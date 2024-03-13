@@ -82,7 +82,7 @@ SELECT publicacao.texto, comentario.texto FROM publicacao LEFT JOIN comentario O
 
 -- 4)
 
-SELECT publicacao.texto, comentario.texto FROM publicacao LEFT JOIN comentario ON comentario.publicacao_id = publicacao.id;
+SELECT publicacao.texto, comentario.texto FROM publicacao JOIN comentario ON comentario.publicacao_id = publicacao.id;
 
 -- 5)
 
@@ -94,11 +94,11 @@ SELECT usuario.id, usuario.nome, count(*) as qtde_publicacoes FROM usuario JOIN 
 
 -- 7)
 
-SELECT publicacao.id, publicacao.texto, count(*) as qtde_comentarios FROM publicacao JOIN comentario ON comentario.publicacao_id = publicacao.id GROUP BY 1 ORDER BY 3 DESC;
+SELECT publicacao.id, publicacao.texto, count(*) as qtde_comentarios FROM publicacao JOIN comentario ON comentario.publicacao_id = publicacao.id GROUP BY 1 HAVING 3 = (SELECT count(*) from publicacao JOIN comentario on publicacao.id = comentario.publicacao_id) ORDER BY 3 DESC;
 
 -- 8)
 
-SELECT id, texto FROM publicacao WHERE id NOT IN (SELECT publicacao.id FROM publicacao JOIN comentario ON comentario.publicacao_id = publicacao.id);
+SELECT id, texto FROM publicacao WHERE id NOT IN (SELECT comentario.publicacao_id FROM comentario);
 
 -- 9)
 
