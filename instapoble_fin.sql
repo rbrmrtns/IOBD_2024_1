@@ -1,3 +1,9 @@
+DROP DATABASE IF EXISTS instapoble;
+
+CREATE DATABASE instapoble;
+
+\c instapoble; 
+
 CREATE TABLE usuario (
     id serial primary key,
     nome character varying (100) not null,
@@ -94,7 +100,7 @@ SELECT usuario.id, usuario.nome, count(*) as qtde_publicacoes FROM usuario JOIN 
 
 -- 7)
 
-SELECT publicacao.id, publicacao.texto, count(*) as qtde_comentarios FROM publicacao JOIN comentario ON comentario.publicacao_id = publicacao.id GROUP BY 1 HAVING 3 = (SELECT count(*) from publicacao JOIN comentario on publicacao.id = comentario.publicacao_id) ORDER BY 3 DESC;
+SELECT publicacao.id, publicacao.texto, count(*) as qtde_comentarios FROM publicacao JOIN comentario ON comentario.publicacao_id = publicacao.id GROUP BY 1 HAVING count(*) = (SELECT count(*) from publicacao JOIN comentario on publicacao.id = comentario.publicacao_id GROUP BY publicacao.id ORDER BY count(*) DESC LIMIT 1) ORDER BY 1;
 
 -- 8)
 
@@ -118,7 +124,7 @@ SELECT publicacao.id, publicacao.texto, count(*) FROM publicacao JOIN conta_publ
 
 -- 13)
 
-SELECT usuario.id, usuario.nome FROM usuario JOIN conta ON conta.usuario_id = usuario.id WHERE conta.id NOT IN (SELECT conta_publicacao.conta_id FROM conta_publicacao);
+SELECT usuario.id, usuario.nome, conta.nome_usuario FROM usuario JOIN conta ON conta.usuario_id = usuario.id WHERE conta.id NOT IN (SELECT conta_publicacao.conta_id FROM conta_publicacao);
 
 -- 14)
 
@@ -126,11 +132,40 @@ SELECT usuario.id, usuario.nome FROM usuario JOIN conta ON conta.usuario_id = us
 
 -- 15)
 
-SELECT conta.id, conta.nome_usuario, count(*) FROM conta JOIN comentario ON comentario.conta_id = conta.id GROUP BY 1 ORDER BY 3 LIMIT 1;
+SELECT conta.id, conta.nome_usuario, count(*) as qtde_comentarios FROM conta JOIN comentario ON comentario.conta_id = conta.id GROUP BY 1 HAVING count(*) = (SELECT count(*) FROM conta JOIN comentario ON conta.id = comentario.conta_id GROUP BY conta.id ORDER BY count(*) DESC LIMIT 1);
 
 -- 16)
 
-SELECT usuario.nome, conta.nome_usuario, conta.data_hora_criacao FROM usuario JOIN conta ON conta.usuario_id = usuario.id GROUP BY 2 ORDER BY 3 DESC LIMIT 1;
+SELECT usuario.nome, conta.nome_usuario, conta.data_hora_criacao FROM usuario JOIN conta ON conta.usuario_id = usuario.id ORDER BY 3 DESC LIMIT 1;
 
 -- 17)
 
+SELECT usuario.id, usuario.nome, count(*) as qtde_contas FROM usuario JOIN conta ON conta.usuario_id = usuario.id GROUP BY 1 HAVING count(*) = (SELECT count(*) FROM usuario JOIN conta ON conta.usuario_id = usuario.id GROUP BY usuario.id ORDER BY count(*) DESC LIMIT 1) ORDER BY 1;
+
+-- 18)
+
+SELECT usuario.id, usuario.nome, count(*) as qtde_contas FROM usuario JOIN conta ON conta.usuario_id = usuario.id GROUP BY 1 HAVING count(*) = (SELECT count(*) FROM usuario JOIN conta ON conta.usuario_id = usuario.id GROUP BY usuario.id ORDER BY count(*) ASC LIMIT 1) ORDER BY 1;
+
+-- 19)
+
+SELECT comentario.id, comentario.texto, comentario.data_hora FROM comentario WHERE comentario.data_hora > CURRENT_TIMESTAMP - INTERVAL '7 DAYS';
+
+-- 20)
+
+SELECT conta.id, conta.nome_usuario FROM conta JOIN usuario ON usuario.id = conta.usuario_id WHERE usuario.data_nascimento = (SELECT usuario.data_nascimento FROM usuario ORDER BY usuario.data_nascimento LIMIT 1);
+
+-- 21)
+
+SELECT usuario.id, usuario.nome, count(conta.id) as qtde_contas FROM usuario LEFT JOIN conta ON conta.usuario_id = usuario.id GROUP BY 1 ORDER BY 3 ASC;
+
+-- 22)
+
+SELECT * FROM comentario WHERE date(data_hora) >= '2024-02-20' AND date(data_hora) < '2024-03-20';
+
+-- 23)
+
+SELECT publicacao.id, publicacao.texto, count(*) as qtde_arquivos FROM publicacao JOIN arquivo ON arquivo.publicacao_id = publicacao.id GROUP BY 1 HAVING count(*) >= 2;
+
+-- order by random();
+
+-- CASE WHEN ... THEN ... ELSE ... END AS (nome)
