@@ -156,15 +156,51 @@ SELECT conta.id, conta.nome_usuario FROM conta JOIN usuario ON usuario.id = cont
 
 -- 21)
 
-SELECT usuario.id, usuario.nome, count(conta.id) as qtde_contas FROM usuario LEFT JOIN conta ON conta.usuario_id = usuario.id GROUP BY 1 ORDER BY 3 ASC;
+SELECT usuario.id, usuario.nome, count(conta.id) as qtde_contas FROM usuario LEFT JOIN conta ON conta.usuario_id = usuario.id GROUP BY usuario.id ORDER BY count(conta.id) ASC;
 
 -- 22)
 
-SELECT * FROM comentario WHERE date(data_hora) >= '2024-02-20' AND date(data_hora) < '2024-03-20';
+SELECT * FROM comentario WHERE date(data_hora) >= '2024-02-20' AND date(data_hora) < '2024-03-30';
 
 -- 23)
 
-SELECT publicacao.id, publicacao.texto, count(*) as qtde_arquivos FROM publicacao JOIN arquivo ON arquivo.publicacao_id = publicacao.id GROUP BY 1 HAVING count(*) >= 2;
+SELECT publicacao.id, publicacao.texto, count(*) as qtde_arquivos FROM publicacao JOIN arquivo ON arquivo.publicacao_id = publicacao.id GROUP BY publicacao.id HAVING count(*) >= 2;
+
+-- 24) & 25)
+
+SELECT publicacao.id, publicacao.texto, length(publicacao.texto) as nmro_caracteres FROM publicacao WHERE length(publicacao.texto) = (SELECT length(publicacao.texto) FROM publicacao ORDER BY 1 DESC LIMIT 1);
+
+-- 26)
+
+SELECT usuario.id, usuario.nome, count(*) as qtde_publicacoes FROM usuario JOIN conta ON conta.usuario_id = usuario.id JOIN conta_publicacao ON conta_publicacao.conta_id = conta.id JOIN publicacao ON publicacao.id = conta_publicacao.publicacao_id WHERE date(publicacao.data_hora) >= '2024-02-20' AND date(publicacao.data_hora) < '2024-03-30' GROUP BY usuario.id HAVING count(*) = (SELECT count(*) FROM usuario JOIN conta ON conta.usuario_id = usuario.id JOIN conta_publicacao ON conta_publicacao.conta_id = conta.id JOIN publicacao ON publicacao.id = conta_publicacao.publicacao_id GROUP BY usuario.id ORDER BY count(*) DESC LIMIT 1);
+
+-- 27)
+
+SELECT conta.id, conta.nome_usuario, count(*) as qtde_publicacoes FROM conta JOIN conta_publicacao ON conta_publicacao.conta_id = conta.id GROUP BY conta.id HAVING count(*) = (SELECT count(*) FROM conta JOIN conta_publicacao ON conta_publicacao.conta_id = conta.id GROUP BY conta.id ORDER BY count(*) DESC LIMIT 1);
+
+-- 28)
+
+
+
+-- 29)
+
+SELECT publicacao.id, publicacao.texto, count(*) as qtde_arquivos FROM publicacao JOIN arquivo ON arquivo.publicacao_id = publicacao.id GROUP BY publicacao.id HAVING count(*) = (SELECT count(*) FROM publicacao JOIN arquivo ON arquivo.publicacao_id = publicacao.id GROUP BY publicacao.id ORDER BY count(*) DESC LIMIT 1);
+
+-- 30)
+
+ALTER TABLE conta_publicacao ADD data_hora timestamp default current_timestamp;
+
+-- 31)
+
+SELECT usuario.id, usuario.nome, count(*) as qtde_comentarios FROM usuario JOIN conta on conta.usuario_id = usuario.id JOIN comentario ON comentario.conta_id = conta.id GROUP BY usuario.id HAVING count(*) = (SELECT count(*) FROM usuario JOIN conta on conta.usuario_id = usuario.id JOIN comentario ON comentario.conta_id = conta.id GROUP BY usuario.id ORDER BY count(*) DESC LIMIT 1);
+
+-- 32)
+
+SELECT conta.id, conta.nome_usuario, count(*) as qtde_comentarios FROM conta JOIN comentario ON comentario.conta_id = conta.id GROUP BY conta.id HAVING count(*) = (SELECT count(*) FROM conta JOIN comentario ON comentario.conta_id = conta.id GROUP BY conta.id ORDER BY count(*) DESC LIMIT 1);
+
+-- 33)
+
+SELECT TO_CHAR(publicacao.data_hora, 'DD/MM/YYYY HH:MI:SS') FROM publicacao;
 
 -- order by random();
 
